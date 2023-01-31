@@ -43,5 +43,6 @@ class Valve: public Tickable {
 };
 
 const char * to_c_str(const Valve::State & s);
+Valve::State parse_valve_state(const std::string & s);
 
 #endif

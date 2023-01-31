@@ -15,6 +15,14 @@ const char * to_c_str(const Valve::State & s) {
     }
 }
 
+Valve::State parse_valve_state(const std::string & s) {
+    if (s == "closed") { return Valve::State::closed; }
+    if (s == "closing") { return Valve::State::closing; }
+    if (s == "open") { return Valve::State::open; }
+    if (s == "opening") { return Valve::State::opening; }
+    return Valve::State::error;
+}
+
 Valve::Valve(BinaryOutput & output, const std::string & name, const unsigned long switch_time_millis)
     : name(name), switch_time_millis(switch_time_millis),
       demand_open(false), output(output), state(Valve::State::closed) {
