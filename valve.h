@@ -1,48 +1,44 @@
-#ifndef CALOR_VALVE_H
-#define CALOR_VALVE_H
+#pragma once
 
 #include <string>
 
 #include <utils/io.h>
 #include <utils/tickable.h>
-#include <utils/timedvalue.h>
 
 #include <ArduinoJson.h>
+#include "namedfsm.h"
 
-class Valve: public Tickable {
+
+enum class ValveState {
+    closed = 0,
+    opening = 1,
+    closing = 2,
+    open = 3,
+    error = -1,
+};
+
+class Valve: public Tickable, public NamedFSM<ValveState> {
     public:
-        enum class State {
-            closed = 0,
-            opening = 1,
-            closing = 2,
-            open = 3,
-            error = -1,
-        };
-
-        Valve(BinaryOutput & output, const std::string & name = "", const unsigned long switch_time_millis = 0);
-        virtual ~Valve() {}
+        Valve(BinaryOutput & output, const char * name = "", const unsigned long switch_time_millis = 0);
+        virtual ~Valve() { delete_metric(); }
 
         void tick() override;
-        State get_state() const;
+
+        void update_metric() const override;
+        void update_mqtt() const override;
 
         DynamicJsonDocument get_config() const;
         DynamicJsonDocument get_status() const;
         bool set_config(const JsonVariantConst & json);
 
-        std::string name;
         unsigned long switch_time_millis;
         bool demand_open;
-
     protected:
-        void set_state(const State new_state);
-        virtual void on_state_change() const {}
+        void delete_metric() const override;
+        virtual const char * get_class_name() const override { return "Valve"; }
 
-    public:
         BinaryOutput & output;
-        TimedValue<State> state;
 };
 
-const char * to_c_str(const Valve::State & s);
-Valve::State parse_valve_state(const std::string & s);
-
-#endif
+const char * to_c_str(const ValveState & s);
+ValveState parse_valve_state(const std::string & s);
