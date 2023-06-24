@@ -2,8 +2,7 @@
 
 #include <string>
 
-#include <utils/io.h>
-#include <utils/tickable.h>
+#include <PicoUtils.h>
 
 #include <ArduinoJson.h>
 #include "namedfsm.h"
@@ -17,9 +16,9 @@ enum class ValveState {
     error = -1,
 };
 
-class Valve: public Tickable, public NamedFSM<ValveState> {
+class Valve: public PicoUtils::Tickable, public NamedFSM<ValveState> {
     public:
-        Valve(BinaryOutput & output, const char * name = "", const unsigned long switch_time_millis = 0);
+        Valve(PicoUtils::BinaryOutput & output, const char * name = "", const unsigned long switch_time_millis = 0);
         virtual ~Valve() { delete_metric(); }
 
         void tick() override;
@@ -37,7 +36,7 @@ class Valve: public Tickable, public NamedFSM<ValveState> {
         void delete_metric() const override;
         virtual const char * get_class_name() const override { return "Valve"; }
 
-        BinaryOutput & output;
+        PicoUtils::BinaryOutput & output;
 };
 
 const char * to_c_str(const ValveState & s);

@@ -3,7 +3,7 @@
 #include <string>
 
 #include <PicoPrometheus.h>
-#include <utils/timedvalue.h>
+#include <PicoUtils.h>
 
 template <typename State>
 class NamedFSM {
@@ -55,5 +55,5 @@ class NamedFSM {
 
     private:
         std::string name;
-        TimedValue<State> state;
+        PicoUtils::TimedValue<State> state;
 };

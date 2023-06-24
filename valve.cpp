@@ -31,7 +31,7 @@ ValveState parse_valve_state(const std::string & s) {
     return ValveState::error;
 }
 
-Valve::Valve(BinaryOutput & output, const char * name, const unsigned long switch_time_millis)
+Valve::Valve(PicoUtils::BinaryOutput & output, const char * name, const unsigned long switch_time_millis)
     : NamedFSM(name, ValveState::closed), switch_time_millis(switch_time_millis),
       demand_open(false), output(output) {
     update_metric();
