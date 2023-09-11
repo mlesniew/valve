@@ -3,10 +3,10 @@
 
 #include "valve.h"
 
-Prometheus & get_prometheus();
+PicoPrometheus::Registry & get_prometheus();
 PicoMQTT::Publisher & get_mqtt_publisher();
 
-static PrometheusGauge gauge_valve_state(get_prometheus(), "valve_state", "Valve state enum");
+static PicoPrometheus::Gauge gauge_valve_state(get_prometheus(), "valve_state", "Valve state enum");
 
 const char * to_c_str(const ValveState & s) {
     switch (s) {
@@ -23,7 +23,7 @@ const char * to_c_str(const ValveState & s) {
     }
 }
 
-ValveState parse_valve_state(const std::string & s) {
+ValveState parse_valve_state(const String & s) {
     if (s == "closed") { return ValveState::closed; }
     if (s == "closing") { return ValveState::closing; }
     if (s == "open") { return ValveState::open; }
@@ -48,8 +48,8 @@ void Valve::update_metric() const {
 }
 
 void Valve::update_mqtt() const {
-    const std::string topic = std::string("valvola/valve/") + get_name();
-    get_mqtt_publisher().publish(topic.c_str(), to_c_str(get_state()));
+    const auto topic = String("valvola/valve/") + get_name();
+    get_mqtt_publisher().publish(topic, to_c_str(get_state()));
 }
 
 void Valve::tick() {
@@ -108,7 +108,7 @@ bool Valve::set_config(const JsonVariantConst & json) {
     const auto object = json.as<JsonObjectConst>();
 
     if (object.containsKey("name")) {
-        set_name(object["name"].as<std::string>().c_str());
+        set_name(object["name"].as<String>().c_str());
     }
 
     if (object.containsKey("switch_time")) {

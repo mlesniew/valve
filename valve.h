@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <Arduino.h>
 
 #include <PicoUtils.h>
 
@@ -40,4 +40,4 @@ class Valve: public PicoUtils::Tickable, public NamedFSM<ValveState> {
 };
 
 const char * to_c_str(const ValveState & s);
-ValveState parse_valve_state(const std::string & s);
+ValveState parse_valve_state(const String & s);

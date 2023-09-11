@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <Arduino.h>
 
 #include <PicoPrometheus.h>
 #include <PicoUtils.h>
@@ -33,8 +33,8 @@ class NamedFSM {
         }
 
     protected:
-        PrometheusLabels get_prometheus_labels() const {
-            return {{"zone", name}};
+        PicoPrometheus::Labels get_prometheus_labels() const {
+            return {{"zone", name.c_str()}};
         }
 
         unsigned long get_millis_elapsed_in_current_state() const { return state.elapsed_millis(); }
@@ -54,6 +54,6 @@ class NamedFSM {
         virtual void delete_metric() const = 0;
 
     private:
-        std::string name;
+        String name;
         PicoUtils::TimedValue<State> state;
 };
