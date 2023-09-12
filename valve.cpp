@@ -34,21 +34,18 @@ ValveState parse_valve_state(const String & s) {
 Valve::Valve(PicoUtils::BinaryOutput & output, const char * name, const unsigned long switch_time_millis)
     : NamedFSM(name, ValveState::closed), switch_time_millis(switch_time_millis),
       demand_open(false), output(output) {
-    update_metric();
     update_mqtt();
+    gauge_valve_state[get_prometheus_labels()].bind([this] {
+        return static_cast<typename std::underlying_type<ValveState>::type>(get_state());
+    });
 }
 
-void Valve::delete_metric() const {
-    gauge_valve_state.remove(get_prometheus_labels());
-}
-
-void Valve::update_metric() const {
-    gauge_valve_state[get_prometheus_labels()].set(static_cast<typename std::underlying_type<ValveState>::type>
-            (get_state()));
+Valve::Valve(PicoUtils::BinaryOutput & output, const JsonVariantConst & json)
+    : Valve(output, json["name"] | "", (json["switch_time"] | 0.0) * 1000.0) {
 }
 
 void Valve::update_mqtt() const {
-    const auto topic = String("valvola/valve/") + get_name();
+    const auto topic = "valvola/valve/" + name;
     get_mqtt_publisher().publish(topic, to_c_str(get_state()));
 }
 
@@ -90,7 +87,7 @@ void Valve::tick() {
 DynamicJsonDocument Valve::get_config() const {
     DynamicJsonDocument json(64);
 
-    json["name"] = get_name();
+    json["name"] = name;
     json["switch_time"] = double(switch_time_millis) * 0.001;
 
     return json;
@@ -102,18 +99,4 @@ DynamicJsonDocument Valve::get_status() const {
     json["state"] = to_c_str(get_state());
 
     return json;
-}
-
-bool Valve::set_config(const JsonVariantConst & json) {
-    const auto object = json.as<JsonObjectConst>();
-
-    if (object.containsKey("name")) {
-        set_name(object["name"].as<String>().c_str());
-    }
-
-    if (object.containsKey("switch_time")) {
-        switch_time_millis = object["switch_time"].as<double>() * 1000;
-    }
-
-    return true;
 }
